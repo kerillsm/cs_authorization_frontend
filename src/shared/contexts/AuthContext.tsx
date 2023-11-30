@@ -39,8 +39,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
         localStorage.setItem("token", data.token);
         localStorage.setItem("tokenExpiredAt", data.expiredAt);
         setToken(data.token);
-      })
-      .catch(console.error);
+      });
   }
 
   function logout() {

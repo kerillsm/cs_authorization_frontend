@@ -1,5 +1,11 @@
+import { Grid } from "@mui/material";
+import { LoginForm } from "features/login-form";
+
 export const LoginPage = () => (
-  <>
-    <h1>Login page</h1>
-  </>
+  <Grid container spacing={2} marginTop={10}>
+    <Grid item xs={4} />
+    <Grid item xs={4}>
+      <LoginForm />
+    </Grid>
+  </Grid>
 );
