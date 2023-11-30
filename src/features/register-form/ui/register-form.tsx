@@ -3,16 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { Typography, TextField, Button, Box } from "@mui/material";
 import { AuthContext } from "shared/contexts/AuthContext";
 
-export const LoginForm = () => {
+export const RegisterForm = () => {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { register } = useContext(AuthContext);
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    login(email, password)
-      .then(() => navigate("/"))
+    register(email, name, password, repeatPassword)
+      .then((r) => {
+        console.log("r", r);
+        navigate("/login");
+      })
       .catch(console.error);
   };
 
@@ -28,7 +33,7 @@ export const LoginForm = () => {
       onSubmit={handleSubmit}
     >
       <Typography variant="h3" component="h3" textAlign="center">
-        Login page
+        Register page
       </Typography>
       <TextField
         value={email}
@@ -39,6 +44,13 @@ export const LoginForm = () => {
         required
       />
       <TextField
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        label="Name"
+        style={{ marginTop: 10 }}
+        required
+      />
+      <TextField
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         label="Password"
@@ -46,9 +58,17 @@ export const LoginForm = () => {
         type="password"
         required
       />
+      <TextField
+        value={repeatPassword}
+        onChange={(e) => setRepeatPassword(e.target.value)}
+        label="Repeat password"
+        style={{ marginTop: 10 }}
+        type="password"
+        required
+      />
       <Button
         style={{ marginTop: 10 }}
-        disabled={!email || !password}
+        disabled={!email || !name || !password || !repeatPassword}
         type="submit"
       >
         Submit

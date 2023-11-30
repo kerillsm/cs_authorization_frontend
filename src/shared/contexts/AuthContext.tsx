@@ -3,11 +3,18 @@ import { createContext, useState, useLayoutEffect } from "react";
 interface State {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (
+    email: string,
+    name: string,
+    password: string,
+    repeatPassword: string
+  ) => Promise<void>;
   logout: () => void;
 }
 
 export const AuthContext = createContext<State>({
-  login: async () => {},
+  login: () => Promise.reject("Application is not initialized"),
+  register: () => Promise.reject("Application is not initialized"),
   logout: () => {},
   token: null,
 });
@@ -29,16 +36,46 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     setToken(token);
   }, []);
 
-  function login(login: string, password: string) {
+  function login(email: string, password: string) {
     return fetch("endpoint", {
       method: "POST",
-      body: JSON.stringify({ login, password }),
+      body: JSON.stringify({ email, password }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.status !== 200) {
+          throw new Error("Error while login");
+        }
+        return response.json();
+      })
       .then((data: { token: string; expiredAt: string }) => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("tokenExpiredAt", data.expiredAt);
         setToken(data.token);
+      });
+  }
+
+  function register(
+    email: string,
+    name: string,
+    password: string,
+    repeatPassword: string
+  ) {
+    if (password !== repeatPassword) {
+      console.log(password, repeatPassword);
+      return Promise.reject(new Error("Password does not match"));
+    }
+    return fetch("endpoint", {
+      method: "POST",
+      body: JSON.stringify({ email, name, password }),
+    })
+      .then((response) => {
+        if (response.status !== 201) {
+          throw new Error("Error while register");
+        }
+        return;
+      })
+      .catch((e) => {
+        console.log("e", e);
       });
   }
 
@@ -49,7 +86,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   }
 
   return (
-    <AuthContext.Provider value={{ login, logout, token }}>
+    <AuthContext.Provider value={{ login, register, logout, token }}>
       {children}
     </AuthContext.Provider>
   );

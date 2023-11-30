@@ -1,5 +1,11 @@
+import { Grid } from "@mui/material";
+import { RegisterForm } from "features/register-form";
+
 export const RegisterPage = () => (
-  <>
-    <h1>Registration page</h1>
-  </>
+  <Grid container spacing={2} marginTop={10}>
+    <Grid item xs={4} />
+    <Grid item xs={4}>
+      <RegisterForm />
+    </Grid>
+  </Grid>
 );
