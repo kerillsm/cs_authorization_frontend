@@ -13,7 +13,7 @@ export const LoginForm = () => {
     e.preventDefault();
     login(email, password)
       .then(() => navigate("/"))
-      .catch(console.error);
+      .catch(alert);
   };
 
   return (

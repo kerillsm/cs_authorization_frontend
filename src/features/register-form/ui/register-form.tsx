@@ -14,11 +14,10 @@ export const RegisterForm = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     register(email, name, password, repeatPassword)
-      .then((r) => {
-        console.log("r", r);
+      .then(() => {
         navigate("/login");
       })
-      .catch(console.error);
+      .catch(alert);
   };
 
   return (

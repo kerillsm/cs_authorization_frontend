@@ -1,4 +1,5 @@
-import { createContext, useState, useLayoutEffect } from "react";
+import { createContext, useState, useEffect } from "react";
+import { axiosInstance } from "shared/axios/axios";
 
 interface State {
   token: string | null;
@@ -22,9 +23,11 @@ export const AuthContext = createContext<State>({
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("token")
+  );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const tokenFromLS = localStorage.getItem("token");
     if (!tokenFromLS) return;
     const expiredAtTokenFromLS = Number(localStorage.getItem("tokenExpiredAt"));
@@ -37,20 +40,23 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   }, []);
 
   function login(email: string, password: string) {
-    return fetch("endpoint", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    })
-      .then((response) => {
-        if (response.status !== 200) {
-          throw new Error("Error while login");
-        }
-        return response.json();
+    return axiosInstance
+      .post("/auth/login", { email, password })
+      .then((d) => d.data)
+      .then((data: { access_token: string; expiredAt: string }) => {
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem(
+          "tokenExpiredAt",
+          String(Date.now() + 60 * 60 * 1000)
+        );
+        setToken(data.access_token);
       })
-      .then((data: { token: string; expiredAt: string }) => {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("tokenExpiredAt", data.expiredAt);
-        setToken(data.token);
+      .catch((error) => {
+        if (error.response) {
+          throw new Error(error.response.data.message);
+        } else {
+          throw new Error(error.message);
+        }
       });
   }
 
@@ -59,23 +65,24 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     name: string,
     password: string,
     repeatPassword: string
-  ) {
+  ): Promise<void> {
     if (password !== repeatPassword) {
-      console.log(password, repeatPassword);
-      return Promise.reject(new Error("Password does not match"));
+      alert("Password does not match");
+      return Promise.reject();
     }
-    return fetch("endpoint", {
-      method: "POST",
-      body: JSON.stringify({ email, name, password }),
-    })
-      .then((response) => {
-        if (response.status !== 201) {
-          throw new Error("Error while register");
-        }
+    return axiosInstance
+      .post("/auth/register", { email, name, password })
+      .then((d) => d.data)
+      .then(({ name, email }) => {
+        alert(`User with name: ${name} and email ${email} created!`);
         return;
       })
-      .catch((e) => {
-        console.log("e", e);
+      .catch((error) => {
+        if (error.response) {
+          throw new Error(error.response.data.message);
+        } else {
+          throw new Error(error.message);
+        }
       });
   }
 
