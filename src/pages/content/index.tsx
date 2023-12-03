@@ -1,5 +1,9 @@
+import { Me } from "features/me";
+import { Navbar } from "features/navbar";
+
 export const ContentPage = () => (
   <>
-    <h1>Content page</h1>
+    <Navbar />
+    <Me />
   </>
 );
